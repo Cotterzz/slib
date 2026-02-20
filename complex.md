@@ -309,7 +309,8 @@ vec2 csign(vec2 z) {
     return m > 0.0 ? z / m : vec2(0);
 }
 ```
-----
+## More Complex, complex functions for doign really complex, complex maths:
+
 ### Möbius Transform
 ```glsl
 // (az + b) / (cz + d) - extremely common in conformal mapping
@@ -365,5 +366,24 @@ vec2 clambertw(vec2 z) {
     }
 
     return w;
+}
+```
+----
+### Zeta
+To visualise the Reimann hypothesis
+ZETA_TERMS: 32 is reasonable for visualization but accuracy degrades for large |Im(s)|. You can tune this per use case - 16 for performance, 64 for accuracy.
+```glsl
+#define ZETA_TERMS 32
+vec2 czeta(vec2 s) {
+    vec2 eta = vec2(0.0);
+
+    for (int n = 1; n <= ZETA_TERMS; n++) {
+        vec2 term = cpow(vec2(float(n), 0.0), -s);
+        eta += (n % 2 == 1) ? term : -term;
+    }
+
+    // Denominator is 0 near s=1 (pole) and at 1 + 2πki/ln(2)
+    vec2 denom = vec2(1.0, 0.0) - cpow(vec2(2.0, 0.0), vec2(1.0, 0.0) - s);
+    return cdiv(eta, denom);
 }
 ```
