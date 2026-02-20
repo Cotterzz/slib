@@ -147,11 +147,17 @@ float carg(vec2 z) { return atan(z.y, z.x); }
 // Squared modulus (avoids sqrt)
 float cabs2(vec2 z) { return dot(z, z); }
 
+vec2 cfract(vec2 z) { return fract(z); }
+vec2 cfloor(vec2 z) { return floor(z); }
+
+float creal(vec2 z) { return z.x; }
+float cimag(vec2 z) { return z.y; }
+
 // More..
 // cadd, csub	Just use + - on vec2
 // cscale(z, f)	Just use z * float
 // cmix	mix() already works on vec2
-// creal, cimag	Just use .x .y
+
 ```
 ----
 ## Trigonomoetric
@@ -160,35 +166,34 @@ float cabs2(vec2 z) { return dot(z, z); }
 ```glsl
 vec2 csin(vec2 z) { return vec2(sin(z.x)*cosh(z.y), cos(z.x)*sinh(z.y)); }
 ```
-
+----
 ### Cosine
 ```glsl
 vec2 ccos(vec2 z) { return vec2(cos(z.x)*cosh(z.y), -sin(z.x)*sinh(z.y)); }
 ```
-
+----
 ### Tangent
 ```glsl
 vec2 ctan(vec2 z) { return cdiv(csin(z), ccos(z)); }
 ```
-
+----
 ## Hyperbolic
-
 
 ### SineH
 ```glsl
 vec2 csinh(vec2 z) { return vec2(sinh(z.x)*cos(z.y), cosh(z.x)*sin(z.y)); }
 ```
-
+----
 ### CosineH
 ```glsl
 vec2 ccosh(vec2 z) { return vec2(cosh(z.x)*cos(z.y), sinh(z.x)*sin(z.y)); }
 ```
-
+----
 ### TangentH
 ```glsl
 vec2 ctanh(vec2 z) { return cdiv(csinh(z), ccosh(z)); }
 ```
-
+----
 ## Inverse
 
 ### Arc Sine
@@ -200,7 +205,7 @@ vec2 casin(vec2 z) {
     return cmul(vec2(0, -1), clog(iz + sq));
 }
 ```
-
+----
 ### Arc Cosine
 ```glsl
 // acos(z) = -i * ln(z + sqrt(z² - 1))
@@ -209,7 +214,7 @@ vec2 cacos(vec2 z) {
     return cmul(vec2(0, -1), clog(z + sq));
 }
 ```
-
+----
 ### Arc Tangent
 ```glsl
 // atan(z) = (i/2) * ln((1-iz)/(1+iz))
@@ -218,7 +223,7 @@ vec2 catan(vec2 z) {
     return cmul(vec2(0, 0.5), clog(cdiv(vec2(1, 0) - iz, vec2(1, 0) + iz)));
 }
 ```
-
+----
 ## Inverse Hyberbolic
 
 ### Arc SineH
@@ -229,7 +234,7 @@ vec2 casinh(vec2 z) {
     return clog(z + sq);
 }
 ```
-
+----
 ### Arc CosineH
 ```glsl
 // acosh(z) = ln(z + sqrt(z² - 1))
@@ -238,11 +243,44 @@ vec2 cacosh(vec2 z) {
     return clog(z + sq);
 }
 ```
-
+----
 ### Arc TangentH
 ```glsl
 // atanh(z) = (1/2) * ln((1+z)/(1-z))
 vec2 catanh(vec2 z) {
     return cmul(vec2(0.5, 0), clog(cdiv(vec2(1, 0) + z, vec2(1, 0) - z)));
+}
+```
+----
+## Misc
+
+### From Polar
+```glsl
+// Construct from polar form: r * e^(iθ)
+vec2 cpolar(float r, float theta) {
+    return vec2(r * cos(theta), r * sin(theta));
+}
+```
+----
+### To Polar
+```glsl
+// Convert to polar (r, theta)
+vec2 ctopolar(vec2 z) {
+    return vec2(length(z), atan(z.y, z.x));
+}
+```
+----
+### Normalize
+```glsl
+// z / |z| - projects onto unit circle
+vec2 cnormalize(vec2 z) {
+    return z / length(z);
+}
+```
+----
+### Optimised square
+```glsl
+vec2 csquare(vec2 z) {
+    return vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y);
 }
 ```
