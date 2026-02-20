@@ -284,3 +284,86 @@ vec2 csquare(vec2 z) {
     return vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y);
 }
 ```
+----
+### Nth root
+```glsl
+vec2 cnroot(vec2 z, float n) {
+    float r = pow(length(z), 1.0 / n);
+    float theta = atan(z.y, z.x) / n;
+    return cpolar(r, theta);
+}
+```
+----
+### Tetration
+```glsl
+// z^z
+vec2 ctetration(vec2 z) {
+    return cexp(cmul(z, clog(z)));
+}
+```
+----
+### Sign
+```glsl
+vec2 csign(vec2 z) {
+    float m = length(z);
+    return m > 0.0 ? z / m : vec2(0);
+}
+```
+----
+### Möbius Transform
+```glsl
+// (az + b) / (cz + d) - extremely common in conformal mapping
+vec2 cmobius(vec2 z, vec2 a, vec2 b, vec2 c, vec2 d) {
+    return cdiv(cmul(a, z) + b, cmul(c, z) + d);
+}
+```
+----
+### Gamma
+```glsl
+// ─── Gamma - Uses the Lanczos approximation
+vec2 cgamma(vec2 z) {
+    vec2 z0 = z;
+    bool reflect = z.x < 0.5;
+    if (reflect) z = vec2(1.0, 0.0) - z;
+    z -= vec2(1.0, 0.0);
+
+    vec2 a = vec2(0.99999999999980993, 0.0);
+    a += cdiv(vec2( 676.5203681218851,     0.0), z + vec2(1, 0));
+    a += cdiv(vec2(-1259.1392167224028,    0.0), z + vec2(2, 0));
+    a += cdiv(vec2( 771.32342877765313,    0.0), z + vec2(3, 0));
+    a += cdiv(vec2(-176.61502916214059,    0.0), z + vec2(4, 0));
+    a += cdiv(vec2( 12.507343278686905,    0.0), z + vec2(5, 0));
+    a += cdiv(vec2(-0.13857109526572012,   0.0), z + vec2(6, 0));
+    a += cdiv(vec2( 9.9843695780195716e-6, 0.0), z + vec2(7, 0));
+    a += cdiv(vec2( 1.5056327351493116e-7, 0.0), z + vec2(8, 0));
+
+    vec2 t      = z + vec2(7.5, 0.0);
+    vec2 result = cmul(
+        vec2(sqrt(2.0 * PI), 0.0),
+        cmul(cpow(t, z + vec2(0.5, 0.0)),
+        cmul(cexp(-t), a))
+    );
+
+    if (reflect) {
+        result = cdiv(vec2(PI, 0.0), cmul(csin(PI * z0), result));
+    }
+    return result;
+}
+```
+----
+### Lambert
+```glsl
+// Principal branch: W(z·eᶻ) = z
+vec2 clambertw(vec2 z) {
+    vec2 w = length(z) > 1.0 ? clog(z) : z;
+
+    // Newton: w -= (w·eʷ - z) / (eʷ·(1+w))
+    for (int i = 0; i < 8; i++) {
+        vec2 ew  = cexp(w);
+        vec2 wew = cmul(w, ew);
+        w -= cdiv(wew - z, cmul(ew, vec2(1.0, 0.0) + w));
+    }
+
+    return w;
+}
+```
